@@ -8,17 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
+    let repository: ChatRepository
+    let llmManager: LLMMManager
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
+        ChatView(repository: repository, llmManager: llmManager)
     }
-}
-
-#Preview {
-    ContentView()
 }
