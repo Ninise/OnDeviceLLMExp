@@ -49,7 +49,10 @@ class LLMMManager {
                 currentSession = session
             }
         } else {
-            currentSession = LanguageModelSession(tools: [CreateEventTool(eventsUtils: eventsUtils)])
+            currentSession = LanguageModelSession(tools: [
+                CreateEventTool(eventsUtils: eventsUtils),
+                CreateNoteTool()
+            ])
             self.session = currentSession
         }
            

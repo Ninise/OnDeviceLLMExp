@@ -16,7 +16,6 @@ class EventsUtils {
 
     init() {}
 
-    /// Modernized permission check supporting iOS 17+ Full Access vs Write-Only
     func ensureAccess() async throws -> Bool {
         let status = EKEventStore.authorizationStatus(for: .event)
         
@@ -24,10 +23,8 @@ class EventsUtils {
         case .fullAccess, .authorized:
             return true
         case .writeOnly:
-            // If your app only needs to create events, writeOnly is sufficient.
             return true
         case .notDetermined:
-            // Use the modern iOS 17 API if available
             if #available(iOS 17.0, *) {
                 return try await eventStore.requestFullAccessToEvents()
             } else {
@@ -41,14 +38,15 @@ class EventsUtils {
     }
 
     /// Creates an event in a specific named calendar
-    func createEvent(title: String, startDate: Date, endDate: Date, inCalendarNamed calendarName: String = "My App Events") async throws -> Bool {
+    func createEvent(title: String, startDate: Date, endDate: Date, inCalendarNamed calendarName: String = "LLM_TEST_CALENDAR") async throws -> Bool {
+        
         // 1. Validation
         guard endDate > startDate else { throw CalendarError.invalidDateRange }
         
         // 2. Ensure Permissions
         let granted = try await ensureAccess()
         guard granted else { throw CalendarError.unauthorized }
-
+        
         // 3. Get or Create the Calendar
         let targetCalendar = try createCalendarIfNeeded(named: calendarName)
 
@@ -58,19 +56,18 @@ class EventsUtils {
         event.startDate = startDate
         event.endDate = endDate
         event.calendar = targetCalendar
-
+        
         do {
             try eventStore.save(event, span: .thisEvent, commit: true)
-            try eventStore.commit()
             return true
         } catch {
-            return false
+            throw CalendarError.eventSaveFailed(error)
         }
     }
 
     private func createCalendarIfNeeded(named name: String) throws -> EKCalendar {
-        // Check if calendar exists (matching by title and source type to avoid duplicates)
         let calendars = eventStore.calendars(for: .event)
+        
         if let existing = calendars.first(where: { $0.title == name && $0.allowsContentModifications }) {
             return existing
         }
@@ -78,12 +75,10 @@ class EventsUtils {
         guard let source = resolveWritableSource() else {
             throw CalendarError.noWritableSource
         }
-
+        
         let newCalendar = EKCalendar(for: .event, eventStore: eventStore)
         newCalendar.title = name
         newCalendar.source = source
-        
-        // Use CGColor safely
         newCalendar.cgColor = UIColor.systemBlue.cgColor
 
         do {

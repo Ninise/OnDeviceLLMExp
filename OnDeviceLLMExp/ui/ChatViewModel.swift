@@ -28,7 +28,7 @@ final class ChatViewModel: ObservableObject {
         Task { @MainActor in
             let eventsUtils = EventsUtils()
             do {
-                try await eventsUtils.ensureAccess()
+                let _ = try await eventsUtils.ensureAccess()
                 print("Events access ensured successfully")
             } catch {
                 print("Failed to ensure events access: \(error)")
