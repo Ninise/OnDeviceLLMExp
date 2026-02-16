@@ -17,9 +17,12 @@ class LLMMManager {
     
     private let model = SystemLanguageModel.default
     private let eventsUtils: EventsUtils
+    private let remindersUtils: RemindersUtils
+
     
-    init(eventsUtils: EventsUtils) {
+    init(eventsUtils: EventsUtils, remindersUtils: RemindersUtils) {
         self.eventsUtils = eventsUtils
+        self.remindersUtils = remindersUtils
     }
     
     func checkModelAvailability() -> (Bool, String) {
@@ -51,7 +54,8 @@ class LLMMManager {
         } else {
             currentSession = LanguageModelSession(tools: [
                 CreateEventTool(eventsUtils: eventsUtils),
-                CreateNoteTool()
+                CreateNoteTool(),
+                CreateReminderTool(remindersUtils: remindersUtils)
             ])
             self.session = currentSession
         }

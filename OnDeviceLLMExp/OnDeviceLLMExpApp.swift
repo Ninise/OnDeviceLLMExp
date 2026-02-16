@@ -13,7 +13,8 @@ struct OnDeviceLLMExpApp: App {
     
     init() {
         let eventsUtils = EventsUtils()
-        let llmManager = LLMMManager(eventsUtils: eventsUtils)
+        let remindersUtils = RemindersUtils()
+        let llmManager = LLMMManager(eventsUtils: eventsUtils, remindersUtils: remindersUtils)
         self.llmManager = llmManager
     }
     
